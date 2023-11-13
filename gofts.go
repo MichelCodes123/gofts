@@ -111,6 +111,6 @@ func type_convert(a reflect.Kind, str string) (interface{}, error, bool) {
 	return nil, nil, false
 }
 
-func Sfts() {
+func Mfts() {
 
 }
