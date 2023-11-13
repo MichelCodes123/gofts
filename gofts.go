@@ -7,17 +7,11 @@ import (
 	"strconv"
 )
 
-func Hello() string {
-	return "hi i've just imported some packages"
-
-}
-
 // Transfers form data into the struct specified by the user. Returns false if the operation fails, and error message for invalid inputs
 // Throws error if:
-// The dest is not a pointer to a struct
+// The dest is not a pointer to a struct, type conversion cannot be made
 func Fts(form map[string][]string, dest interface{}) error {
 
-	//Verify if the destination string is a struct
 	v := reflect.ValueOf(dest)
 	if v.Kind() != reflect.Ptr {
 		return fmt.Errorf("%s", "Must be a pointer to a struct")
@@ -29,35 +23,36 @@ func Fts(form map[string][]string, dest interface{}) error {
 	}
 
 	for i := 0; i < d.NumField(); i++ {
-		//f := d.Field(i)
-		//Find the name of the field, within the struct
-		name := d.Type().Field(i).Name
+		
+		nameOfStructField := d.Type().Field(i).Name
+		g, o := form[nameOfStructField]
 
-		//Set the value of the struct field, to the corresponding value with the map
-		g, o := form[name]
-
-		//If the form contains a value with the same name as the struct field. Mapping must reflect value into that field.
 		if o {
-			//Form data mappings may contain a list of values. If the mapping has a length greater than 0.
-			//Make sure that the field
-			if len(g) > 0 {
-				//Make sure that the field is a slice (to hold all form values)
+			//Form data mappings may contain a list of values. Check if this is the case
+			if len(g) > 1 {
+				//Ensure that the field can support the list of values... Should be kind of slice.
 				if d.Field(i).Kind() == reflect.Slice {
+					newslice, err, supported := type_convert_slice(g, d.Field(i).Type())
+					if err != nil {
+						return err
+					}
+					if supported {
+						d.Field(i).Set(newslice)
+					}
 
-					newslice, _ := tca(g, d.Field(i).Type())
-					d.Field(i).Set(reflect.ValueOf(newslice))
 				}
 			} else {
-				//Must perform type conversion if the struct value is not of type string.
-				converted, _, supported := tc(d.Field(i).Kind(), g[0])
-
+		
+				converted, err, supported := type_convert(d.Field(i).Kind(), g[0])
+				if err != nil {
+					return err
+				}
 				//Non supported fields are ignored, only supported fields are set.
 				if supported {
 					d.Field(i).Set(reflect.ValueOf(converted).Convert(d.Field(i).Type()))
 				}
 
 			}
-
 		}
 	}
 
@@ -65,17 +60,32 @@ func Fts(form map[string][]string, dest interface{}) error {
 	return nil
 }
 
-func tca(arr []string, t reflect.Type) (interface{}, error) {
+func type_convert_slice(arr []string, t reflect.Type) (reflect.Value, error, bool) {
+	//t is the array type. I.e []int, []float32
+	//t.Elem() returns the type of an element. I.e int
+	//t.Elem.kind() returns the underlying type of the element. I.e int
+	//Make sure of this ^
 
-	//make array slice
-	//use tc to return the proper type
+	switch t.Elem().Kind() {
+	case reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Bool:
+		n := reflect.MakeSlice(t, 0, len(arr))
+		for _, v := range arr {
+			converted, err, _ := type_convert(t.Elem().Kind(), v)
+			if err != nil {
+				return reflect.ValueOf("0"), err, false
+			}
+			n = reflect.Append(n, reflect.ValueOf(converted).Convert(t.Elem()))
+		}
 
-	return nil, nil
+		return n, nil,true
+	}
+
+	return reflect.ValueOf("0"), nil, false
 
 }
 
 // Type conversion which returns the correct type from a given string. The form data mapping returns an array of strings.
-func tc(a reflect.Kind, str string) (interface{}, error, bool) {
+func type_convert(a reflect.Kind, str string) (interface{}, error, bool) {
 	//Store the string of the struct field.
 	g := a.String()
 
@@ -111,15 +121,16 @@ type str struct {
 	A int32
 	B string
 	C []int
+	D []string
 }
 
 func main() {
-
 	var s str
 	data := make(map[string][]string)
 	data["A"] = []string{"1"}
 	data["B"] = []string{"Bonjour"}
 	data["C"] = []string{"1", "2", "3"}
+	data["D"] = []string{"Peter", "James", "John"}
 
 	Fts(data, &s)
 
