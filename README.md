@@ -9,3 +9,13 @@ I was recently working on a CRUD app that required receiving user information as
 
 
 ## Installation
+
+## Supported Types 
+
+The module supports types that would most commonly be received as form data for an app.
+- int - int64
+- uint - uint64
+- float32, float64
+- bool 
+- string
+- slice (as long as the slice is of one of the above types)
