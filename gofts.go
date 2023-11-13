@@ -39,7 +39,6 @@ func Fts(form map[string][]string, dest interface{}) error {
 					if supported {
 						d.Field(i).Set(newslice)
 					}
-
 				}
 			} else {
 		
