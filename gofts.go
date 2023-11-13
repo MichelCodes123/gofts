@@ -1,5 +1,5 @@
 // Change to package gofts
-package main
+package gofts
 
 import (
 	"fmt"
@@ -55,7 +55,6 @@ func Fts(form map[string][]string, dest interface{}) error {
 		}
 	}
 
-	fmt.Print(dest)
 	return nil
 }
 
@@ -113,24 +112,5 @@ func type_convert(a reflect.Kind, str string) (interface{}, error, bool) {
 }
 
 func Sfts() {
-
-}
-
-type str struct {
-	A int32
-	B string
-	C []int
-	D []string
-}
-
-func main() {
-	var s str
-	data := make(map[string][]string)
-	data["A"] = []string{"1"}
-	data["B"] = []string{"Bonjour"}
-	data["C"] = []string{"1", "2", "3"}
-	data["D"] = []string{"Peter", "James", "John"}
-
-	Fts(data, &s)
 
 }
