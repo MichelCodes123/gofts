@@ -60,7 +60,7 @@ func Fts(form map[string][]string, dest interface{}) error {
 
 func type_convert_slice(arr []string, t reflect.Type) (reflect.Value, error, bool) {
 	//t is the array type. I.e []int, []float32
-	//t.Elem() returns the type of an element. I.e int
+	//t.Elem() returns the type of an element in the array. I.e int
 	//t.Elem.kind() returns the underlying type of the element. I.e int
 	//Make sure of this ^
 

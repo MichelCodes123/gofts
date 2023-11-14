@@ -2,7 +2,6 @@ package gofts
 
 import (
 	"fmt"
-	_ "fmt"
 	"reflect"
 	"testing"
 )

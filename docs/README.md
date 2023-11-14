@@ -7,7 +7,6 @@ I was recently working on a CRUD app that required receiving user information as
 
 ## Usage
 
-
 ## Installation
 
 ## Supported Types 
