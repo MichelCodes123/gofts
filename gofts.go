@@ -7,9 +7,10 @@ import (
 	"strconv"
 )
 
-// Transfers form data into the struct specified by the user. Returns false if the operation fails, and error message for invalid inputs
+// Transfers form data into the struct specified by the user. 
 // Throws error if:
-// The dest is not a pointer to a struct, type conversion cannot be made
+// [1] The dest is not a pointer to a struct, [2] Type conversion cannot be made.
+// Unsupported types are ignored
 func Fts(form map[string][]string, dest interface{}) error {
 
 	v := reflect.ValueOf(dest)
@@ -23,7 +24,7 @@ func Fts(form map[string][]string, dest interface{}) error {
 	}
 
 	for i := 0; i < d.NumField(); i++ {
-		
+
 		nameOfStructField := d.Type().Field(i).Name
 		g, o := form[nameOfStructField]
 
@@ -40,8 +41,9 @@ func Fts(form map[string][]string, dest interface{}) error {
 						d.Field(i).Set(newslice)
 					}
 				}
+				//If the field cannot support the list of values, do nothing
 			} else {
-		
+
 				converted, err, supported := type_convert(d.Field(i).Kind(), g[0])
 				if err != nil {
 					return err
@@ -54,7 +56,6 @@ func Fts(form map[string][]string, dest interface{}) error {
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -65,7 +66,7 @@ func type_convert_slice(arr []string, t reflect.Type) (reflect.Value, error, boo
 	//Make sure of this ^
 
 	switch t.Elem().Kind() {
-	case reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Bool:
+	case reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Bool:
 		n := reflect.MakeSlice(t, 0, len(arr))
 		for _, v := range arr {
 			converted, err, _ := type_convert(t.Elem().Kind(), v)
@@ -75,7 +76,7 @@ func type_convert_slice(arr []string, t reflect.Type) (reflect.Value, error, boo
 			n = reflect.Append(n, reflect.ValueOf(converted).Convert(t.Elem()))
 		}
 
-		return n, nil,true
+		return n, nil, true
 	}
 
 	return reflect.ValueOf("0"), nil, false
@@ -111,6 +112,17 @@ func type_convert(a reflect.Kind, str string) (interface{}, error, bool) {
 	return nil, nil, false
 }
 
-func Mfts() {
+//Transfers input form data into *multiple* structs specified by the user. The second argument accepts a list of structs
+// Throws error if:
+// [1] The dest is not a pointer to a struct, [2] Type conversion cannot be made.
+// Unsupported types are ignored 
+func Mfts(form map[string][]string, dest ...interface{}) error {
+	for _, v := range dest {
+		err := Fts(form, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 
 }
