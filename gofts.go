@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// Transfers form data into the struct specified by the user. 
+// Transfers form data into the struct specified by the user.
 // Throws error if:
 // [1] The dest is not a pointer to a struct, [2] Type conversion cannot be made.
 // Unsupported types are ignored
@@ -29,19 +29,15 @@ func Fts(form map[string][]string, dest interface{}) error {
 		g, o := form[nameOfStructField]
 
 		if o {
-			//Form data mappings may contain a list of values. Check if this is the case
-			if len(g) > 1 {
-				//Ensure that the field can support the list of values... Should be kind of slice.
-				if d.Field(i).Kind() == reflect.Slice {
-					newslice, err, supported := type_convert_slice(g, d.Field(i).Type())
-					if err != nil {
-						return err
-					}
-					if supported {
-						d.Field(i).Set(newslice)
-					}
+			if d.Field(i).Kind() == reflect.Slice {
+				newslice, err, supported := type_convert_slice(g, d.Field(i).Type())
+				if err != nil {
+					return err
 				}
-				//If the field cannot support the list of values, do nothing
+				if supported {
+					d.Field(i).Set(newslice)
+				}
+
 			} else {
 
 				converted, err, supported := type_convert(d.Field(i).Kind(), g[0])
@@ -102,7 +98,7 @@ func type_convert(a reflect.Kind, str string) (interface{}, error, bool) {
 		return i, err, true
 	case reflect.Float32, reflect.Float64:
 		gg, _ := strconv.Atoi(g[5:])
-		i, err := strconv.ParseUint(str, 10, gg)
+		i, err := strconv.ParseFloat(str, gg)
 		return i, err, true
 	case reflect.Bool:
 		i, err := strconv.ParseBool(str)
@@ -112,10 +108,10 @@ func type_convert(a reflect.Kind, str string) (interface{}, error, bool) {
 	return nil, nil, false
 }
 
-//Transfers input form data into *multiple* structs specified by the user. The second argument accepts a list of structs
+// Transfers input form data into *multiple* structs specified by the user. The second argument accepts a list of structs
 // Throws error if:
 // [1] The dest is not a pointer to a struct, [2] Type conversion cannot be made.
-// Unsupported types are ignored 
+// Unsupported types are ignored
 func Mfts(form map[string][]string, dest ...interface{}) error {
 	for _, v := range dest {
 		err := Fts(form, v)
