@@ -14,6 +14,7 @@ var str struct{
     address   string
     nums      []int
 }
+
 http.handleFunc("/index", func(w http.ResponseWriter, r *http.Request){
     r.ParseForm
     //r.Form => [ firstName: [James], lastName: [Bond], address: [25 James Bond Rd], nums: [1, 2,3]]
