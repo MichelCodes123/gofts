@@ -1,4 +1,3 @@
-// Change to package gofts
 package gofts
 
 import (

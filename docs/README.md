@@ -6,6 +6,9 @@ Golang module that allows you to persist form data into structs for storage, san
 I was recently working on a CRUD app that required receiving user information as form data on the backend. I wanted to easily persist the data to multiple *different* structs at once rather than having to type convert and manually assign each field. I decided to just write this package myself, and use it as an opportunity to learn more about Go, its type system and reflection.
 
 ## Usage
+The module currently supports two functions, Fts() and Mfts(). Fts() will persist form data into a single struct, whereas Mfts() will persist form data into multiple structs specified by the user. 
+
+Ex. 
 ```go
 
 var str struct{
@@ -33,9 +36,14 @@ http.handleFunc("/index", func(w http.ResponseWriter, r *http.Request){
 
 ## Installation
 
+```
+go get -u github.com/michelcodes123/gofts
+
+```
+
 ## Supported Types 
 
-The module supports types that would most commonly be received as form data for an app.
+The module supports types that would most commonly be received as form data for an app. Other types are ignored.
 - int - int64
 - uint - uint64
 - float32, float64
